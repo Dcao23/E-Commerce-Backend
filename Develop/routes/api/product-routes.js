@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { Product, Category, Tag, ProductTag } = require('../../models');
+const { Category, Product, Tag, ProductTag } = require('../../models');
 
 // The `/api/products` endpoint
 
@@ -8,11 +8,12 @@ router.get('/', async (req, res) => {
   // find all products
   // be sure to include its associated Category and Tag data
   try {
-    const productData = await product.findAll(req.params.id, {
-      include: [{ model: product, through: product.js, as: 'associated category/tag'}]
+    const productData = await Product.findAll({
+      include: [Category, Tag]
     });
     res.status(200).json(productData);
   } catch (err) {
+    console.log(err);
     res.status(500).json(err);
   }
 });
@@ -22,8 +23,8 @@ router.get('/:id', async (req, res) => {
   // find a single product by its `id`
   // be sure to include its associated Category and Tag data
   try {
-    const productData = await product.findByPk(req.params.id, {
-      include: [{ model: product, through: product.js, as: 'associated category/tag'}]
+    const productData = await Product.findByPk(req.params.id, {
+      include: [Category, Tag]
     });
     if(!productData) {
       res.status(404).json({ message: 'No product found with this id!'});
@@ -31,12 +32,14 @@ router.get('/:id', async (req, res) => {
     }
     res.status(200).json(productData);
   } catch (err) {
+    console.log(err);
     res.status(500).json(err);
   }
 });
 
 // create new product
 router.post('/', async (req, res) => {
+
   /* req.body should look like this...
     {
       product_name: "Basketball",
@@ -65,7 +68,7 @@ router.post('/', async (req, res) => {
       console.log(err);
       res.status(400).json(err);
     });
-});
+})
 
 // update product
 router.put('/:id', (req, res) => {
@@ -104,7 +107,7 @@ router.put('/:id', (req, res) => {
     })
     .then((updatedProductTags) => res.json(updatedProductTags))
     .catch((err) => {
-      // console.log(err);
+      console.log(err);
       res.status(400).json(err);
     });
 });
